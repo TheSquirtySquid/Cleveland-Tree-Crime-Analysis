@@ -1,0 +1,142 @@
+----------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  H:\POSC Capstone\Violent_Regression.log
+  log type:  text
+ opened on:  24 Apr 2022, 14:25:12
+. }
+
+. 
+. 
+. ***Creating dta files and merging datasets***
+. {
+. import excel "H:\POSC Capstone\Neighboorhood Crime and Demographic.xlsx", sheet("Sheet1") cellrang
+> e(A1:N35) firstrow clear
+(14 vars, 34 obs)
+. save Neighboorhood_Crime.dta, replace
+file Neighboorhood_Crime.dta saved
+. 
+. clear
+. 
+. import excel "H:\POSC Capstone\Cleveland Neighborhood Tree Cover.xlsx", sheet("ClevelandSPA_UTC_ac
+> res") cellrange(A1:AP35) firstrow clear
+(42 vars, 34 obs)
+. save Neighboorhood_Tree.dta, replace
+file Neighboorhood_Tree.dta saved
+. 
+. clear
+. 
+. use Neighboorhood_Tree
+. 
+. merge m:1 Neighborhood using Neighboorhood_Crime.dta, update replace
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+
+    Matched                                34
+        not updated                        34  (_merge==3)
+        missing updated                     0  (_merge==4)
+        nonmissing conflict                 0  (_merge==5)
+    -----------------------------------------
+. }
+
+. 
+. 
+. ***Creating Percent Change Variables***
+. {
+. gen Violent_Change = (Totalviolentcrimes2017-Totalviolentcrimes2011)/Totalviolentcrimes2011
+. 
+. drop Totalviolentcrimes2017 Totalviolentcrimes2011
+. }
+
+. 
+. 
+. ***Renaming and Fixing Variables***
+. {
+.    rename PercentChange Tree_Cover_Change
+.    rename Unemploymentrate2012 Unemployment_Rate
+.    rename Childrenunderage6testedfor ChildElevatedLead
+.    rename Residentialparcelsalessingl Resid_SingleFam
+. }
+
+. 
+. search estout
+
+. 
+. reg Violent_Change Tree_Cover_Change, vce(bootstrap, reps (1000) bca)
+(running regress on estimation sample)
+
+Jackknife replications (34)
+----+--- 1 ---+--- 2 ---+--- 3 ---+--- 4 ---+--- 5 
+..................................
+
+Bootstrap replications (1,000)
+----+--- 1 ---+--- 2 ---+--- 3 ---+--- 4 ---+--- 5 
+..................................................    50
+..................................................   100
+..................................................   150
+..................................................   200
+..................................................   250
+..................................................   300
+..................................................   350
+..................................................   400
+..................................................   450
+..................................................   500
+..................................................   550
+..................................................   600
+..................................................   650
+..................................................   700
+..................................................   750
+..................................................   800
+..................................................   850
+..................................................   900
+..................................................   950
+.................................................. 1,000
+
+Linear regression                                       Number of obs =     34
+                                                        Replications  =  1,000
+                                                        Wald chi2(1)  =   4.88
+                                                        Prob > chi2   = 0.0272
+                                                        R-squared     = 0.1028
+                                                        Adj R-squared = 0.0748
+                                                        Root MSE      = 0.3068
+
+-----------------------------------------------------------------------------------
+                  |   Observed   Bootstrap                         Normal-based
+   Violent_Change | coefficient  std. err.      z    P>|z|     [95% conf. interval]
+------------------+----------------------------------------------------------------
+Tree_Cover_Change |  -2.113391    .956618    -2.21   0.027    -3.988328    -.238454
+            _cons |  -.0172271   .0572811    -0.30   0.764    -.1294961    .0950418
+-----------------------------------------------------------------------------------
+
+. estimates store m1, title(Module 1)
+
+. 
+. reg Violent_Change Tree_Cover_Change Personswith9th12thgradeeduc, vce(bootstrap, reps (1000) bca)
+(running regress on estimation sample)
+
+Jackknife replications (34)
+----+--- 1 ---+--- 2 ---+--- 3 ---+--- 4 ---+--- 5 
+..................................
+
+Bootstrap replications (1,000)
+----+--- 1 ---+--- 2 ---+--- 3 ---+--- 4 ---+--- 5 
+..................................................    50
+..................................................   100
+..................................................   150
+..................................................   200
+..................................................   250
+..................................................   300
+..................................................   350
+..--Break--
+r(1);
+
+end of do-file
+--Break--
+r(1);
+
+end of do-file
+
+--Break--
+r(1);
+
